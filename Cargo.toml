@@ -1,0 +1,6 @@
+[package]
+name = "low_latency_ai_agent_platform"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
