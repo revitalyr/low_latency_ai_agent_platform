@@ -1,6 +1,82 @@
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use chrono::{DateTime, Utc};
+
+/// Domain-specific error types for better error handling
+#[derive(Debug, thiserror::Error)]
+pub enum ToolError {
+    #[error("Timeout occurred during execution")]
+    Timeout,
+    
+    #[error("Network error: {0}")]
+    Network(String),
+    
+    #[error("Invalid input parameters")]
+    InvalidInput,
+    
+    #[error("Execution failed: {0}")]
+    ExecutionFailed(String),
+    
+    #[error("Tool not found: {0}")]
+    ToolNotFound(String),
+    
+    #[error("Cache error: {0}")]
+    CacheError(String),
+}
+
+/// Type alias for Result with domain error
+pub type ToolResult<T> = std::result::Result<T, ToolError>;
+
+/// Tool execution context for better control
+#[derive(Debug, Clone)]
+pub struct ToolContext {
+    pub request_id: String,
+    pub timeout_ms: Option<u64>,
+    pub retry_count: u32,
+}
+
+impl ToolContext {
+    pub fn new(request_id: String) -> Self {
+        Self {
+            request_id,
+            timeout_ms: Some(10000), // 10 second default timeout
+            retry_count: 0,
+        }
+    }
+    
+    pub fn with_timeout(mut self, timeout_ms: u64) -> Self {
+        self.timeout_ms = Some(timeout_ms);
+        self
+    }
+    
+    pub fn no_timeout(mut self) -> Self {
+        self.timeout_ms = None;
+        self
+    }
+}
+
+/// Represents the type of tool to execute
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
+pub enum ToolType {
+    Http,
+    File,
+    Compute,
+    HeavyCompute,
+    HeavyFile,
+}
+
+impl std::fmt::Display for ToolType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ToolType::Http => write!(f, "http"),
+            ToolType::File => write!(f, "file"),
+            ToolType::Compute => write!(f, "compute"),
+            ToolType::HeavyCompute => write!(f, "heavy_compute"),
+            ToolType::HeavyFile => write!(f, "heavy_file"),
+        }
+    }
+}
 
 /// Represents a request to execute a specific tool
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -12,7 +88,7 @@ pub struct ToolRequest {
     /// Parameters specific to the tool being executed
     pub parameters: HashMap<String, serde_json::Value>,
     /// Timestamp when the request was created
-    pub timestamp: chrono::DateTime<chrono::Utc>,
+    pub timestamp: DateTime<Utc>,
 }
 
 /// Represents the response from a tool execution
@@ -27,18 +103,7 @@ pub struct ToolResponse {
     /// Whether this result was retrieved from cache
     pub cached: bool,
     /// Timestamp when the response was generated
-    pub timestamp: chrono::DateTime<chrono::Utc>,
-}
-
-/// Supported tool types in the system
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub enum ToolType {
-    /// HTTP API tool for external requests
-    Http,
-    /// File system operations tool
-    File,
-    /// Mathematical computations tool
-    Compute,
+    pub timestamp: DateTime<Utc>,
 }
 
 /// Represents a complete agent task with multiple tool requests
@@ -51,7 +116,7 @@ pub struct AgentTask {
     /// List of tool requests to execute
     pub tools: Vec<ToolRequest>,
     /// Timestamp when the task was created
-    pub timestamp: chrono::DateTime<chrono::Utc>,
+    pub timestamp: DateTime<Utc>,
 }
 
 /// Represents the final response after executing all tools
@@ -66,5 +131,5 @@ pub struct AgentResponse {
     /// Total execution time for all tools in milliseconds
     pub total_execution_time_ms: u64,
     /// Timestamp when the response was generated
-    pub timestamp: chrono::DateTime<chrono::Utc>,
+    pub timestamp: DateTime<Utc>,
 }

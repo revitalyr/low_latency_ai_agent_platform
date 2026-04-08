@@ -1,17 +1,18 @@
-use crate::types::{ToolRequest, ToolResponse, ToolType};
+use crate::types::{ToolRequest, ToolResponse, ToolType, ToolContext, ToolResult};
 use crate::tools::Tool;
 use async_trait::async_trait;
 use std::time::Instant;
 use std::time::Duration;
-use reqwest;
-use serde_json;
-use futures;
 
 pub struct HttpTool;
 
 #[async_trait]
 impl Tool for HttpTool {
-    async fn execute(&self, request: &ToolRequest) -> anyhow::Result<ToolResponse> {
+    async fn execute(
+        &self, 
+        request: &ToolRequest, 
+        _ctx: &ToolContext
+    ) -> ToolResult<ToolResponse> {
         let start = Instant::now();
         
         let method = request.parameters.get("method")
@@ -32,7 +33,8 @@ impl Tool for HttpTool {
             .connection_verbose(false)
             .pool_max_idle_per_host(10)
             .pool_idle_timeout(Duration::from_secs(30))
-            .build()?;
+            .build()
+            .map_err(|e| ToolError::Network(e.to_string()))?;
         
         let result = match method {
             "GET" => {
@@ -40,10 +42,12 @@ impl Tool for HttpTool {
                     .get(url)
                     .header("User-Agent", "Low-Latency-AI-Agent/1.0")
                     .send()
-                    .await?;
+                    .await
+                    .map_err(|e| ToolError::Network(e.to_string()))?;
                 
                 let status = response.status().as_u16();
-                let response_text = response.text().await?;
+                let response_text = response.text().await
+                    .map_err(|e| ToolError::Network(e.to_string()))?;
                 
                 serde_json::json!({
                     "status": status,
@@ -60,17 +64,20 @@ impl Tool for HttpTool {
                         .header("Content-Type", "application/json")
                         .json(&body_obj)
                         .send()
-                        .await?
+                        .await
+                        .map_err(|e| ToolError::Network(e.to_string()))?
                 } else {
                     client
                         .post(url)
                         .header("User-Agent", "Low-Latency-AI-Agent/1.0")
                         .send()
-                        .await?
+                        .await
+                        .map_err(|e| ToolError::Network(e.to_string()))?
                 };
                 
                 let status = response.status().as_u16();
-                let response_text = response.text().await?;
+                let response_text = response.text().await
+                    .map_err(|e| ToolError::Network(e.to_string()))?;
                 
                 serde_json::json!({
                     "status": status,
@@ -87,17 +94,20 @@ impl Tool for HttpTool {
                         .header("Content-Type", "application/json")
                         .json(&body_obj)
                         .send()
-                        .await?
+                        .await
+                        .map_err(|e| ToolError::Network(e.to_string()))?
                 } else {
                     client
                         .put(url)
                         .header("User-Agent", "Low-Latency-AI-Agent/1.0")
                         .send()
-                        .await?
+                        .await
+                        .map_err(|e| ToolError::Network(e.to_string()))?
                 };
                 
                 let status = response.status().as_u16();
-                let response_text = response.text().await?;
+                let response_text = response.text().await
+                    .map_err(|e| ToolError::Network(e.to_string()))?;
                 
                 serde_json::json!({
                     "status": status,
@@ -111,10 +121,12 @@ impl Tool for HttpTool {
                     .delete(url)
                     .header("User-Agent", "Low-Latency-AI-Agent/1.0")
                     .send()
-                    .await?;
+                    .await
+                    .map_err(|e| ToolError::Network(e.to_string()))?;
                 
                 let status = response.status().as_u16();
-                let response_text = response.text().await?;
+                let response_text = response.text().await
+                    .map_err(|e| ToolError::Network(e.to_string()))?;
                 
                 serde_json::json!({
                     "status": status,

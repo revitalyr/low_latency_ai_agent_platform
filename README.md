@@ -92,16 +92,35 @@ This project demonstrates how to build **high-performance infrastructure for AI 
    cd low_latency_ai_agent_platform
    ```
 
-2. **Start the Rust backend**:
+2. **Run the complete demo** (recommended):
    ```bash
-   cd rust-core
-   cargo run
+   # Windows
+   run_demo.bat
+   
+   # Linux/macOS
+   chmod +x run_demo.sh
+   ./run_demo.sh
    ```
+   
+   This will:
+   - Build the optimized Rust backend with LTO
+   - Start the server
+   - Run all tests
+   - Execute performance benchmarks
+   - Show results
 
-3. **Set up the Python environment**:
+3. **Or manual setup**:
    ```bash
+   # Start the Rust backend
+   cd rust-core
+   cargo run --release
+   
+   # In another terminal, run Python demo
    cd python-agent
-   pip install -r requirements.txt
+   python run_demo.py
+   
+   # Run quick tests
+   python quick_test.py
    ```
 
 4. **Configure the environment**:

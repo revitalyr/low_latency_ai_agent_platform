@@ -15,6 +15,7 @@ use serde_json::Value;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::sync::RwLock;
+use tokio::task::LocalSet;
 use tower_http::cors::{Any, CorsLayer};
 use tracing::{info, error};
 use tracing_subscriber;
@@ -67,51 +68,34 @@ async fn execute_task(
     
     state.metrics.record_request();
     
-    let mut tool_responses = Vec::new();
+    // Create context for this execution
+    let ctx = crate::types::ToolContext::new(task.id.to_string());
     
-    for request in &task.tools {
-        let mut cache = state.cache.write().await;
-        
-        if let Some(cached_response) = cache.get(request) {
-            info!("Cache hit: {}", request.id);
-            state.metrics.record_cache_hit();
-            tool_responses.push(cached_response);
-            continue;
-        }
-        
-        state.metrics.record_cache_miss();
-        drop(cache);
-        
-        match state.tool_registry.execute_tool(request).await {
-            Ok(response) => {
-                let mut cache = state.cache.write().await;
-                cache.put(request, response.clone());
-                tool_responses.push(response);
-            }
-            Err(e) => {
-                error!("Tool execution failed: {} - {}", request.id, e);
-                return Err(StatusCode::INTERNAL_SERVER_ERROR);
-            }
+    // Execute plan with parallel processing, retry, and caching
+    match state.engine.execute_plan(task.tools, &state.tool_registry, state.cache).await {
+        Ok(tool_responses) => {
+            let total_execution_time = start_time.elapsed().as_millis() as u64;
+            
+            let agent_response = AgentResponse {
+                id: task.id,
+                result: format!("Executed {} tools successfully", tool_responses.len()),
+                tool_responses,
+                total_execution_time_ms: total_execution_time,
+                timestamp: chrono::Utc::now(),
+            };
+            
+            info!(
+                "Task completed: {} in {}ms",
+                agent_response.id, total_execution_time
+            );
+            
+            Ok(ResponseJson(agent_response))
+        },
+        Err(e) => {
+            tracing::error!("Failed to execute agent task: {}", e);
+            Err(StatusCode::INTERNAL_SERVER_ERROR)
         }
     }
-    
-    let total_execution_time = start_time.elapsed().as_millis() as u64;
-    state.metrics.record_execution_time(total_execution_time);
-    
-    let agent_response = AgentResponse {
-        id: task.id,
-        result: format!("Executed {} tools successfully", tool_responses.len()),
-        tool_responses,
-        total_execution_time_ms: total_execution_time,
-        timestamp: chrono::Utc::now(),
-    };
-    
-    info!(
-        "Task completed: {} in {}ms",
-        agent_response.id, total_execution_time
-    );
-    
-    Ok(ResponseJson(agent_response))
 }
 
 async fn metrics(

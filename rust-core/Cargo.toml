@@ -13,6 +13,7 @@ serde_json = "1.0"
 uuid = { version = "1.0", features = ["v4", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
 anyhow = "1.0"
+thiserror = "1.0"
 tracing = "0.1"
 tracing-subscriber = "0.3"
 reqwest = { version = "0.11", features = ["json"] }
@@ -21,6 +22,20 @@ futures = "0.3"
 metrics = "0.22"
 metrics-exporter-prometheus = "0.13"
 lru = "0.12"
+
+[profile.release]
+# Maximum performance optimizations
+lto = true              # Link Time Optimization - optimizes across crate boundaries
+codegen-units = 1       # Single codegen unit for better optimization
+panic = "abort"         # Abort instead of unwind for smaller binary
+strip = true            # Strip debug symbols
+opt-level = 3           # Highest optimization level
+overflow-checks = false # Disable overflow checks in release
+
+[profile.dev]
+# Faster development builds
+opt-level = 1           # Some optimizations even in debug
+overflow-checks = true  # Keep safety in debug
 
 [[bin]]
 name = "rust-core"

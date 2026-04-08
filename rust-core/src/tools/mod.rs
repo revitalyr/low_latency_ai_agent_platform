@@ -1,4 +1,4 @@
-use crate::types::{ToolRequest, ToolResponse, ToolType};
+use crate::types::{ToolRequest, ToolResponse, ToolType, ToolContext, ToolResult};
 use async_trait::async_trait;
 use std::collections::HashMap;
 
@@ -16,7 +16,12 @@ pub use heavy_file::HeavyFileTool;
 
 #[async_trait]
 pub trait Tool: Send + Sync {
-    async fn execute(&self, request: &ToolRequest) -> anyhow::Result<ToolResponse>;
+    async fn execute(
+        &self, 
+        request: &ToolRequest, 
+        ctx: &ToolContext
+    ) -> ToolResult<ToolResponse>;
+    
     fn tool_type(&self) -> ToolType;
     fn name(&self) -> &'static str;
 }
@@ -36,13 +41,12 @@ impl ToolRegistry {
         self.tools.insert(tool.name().to_string(), Box::new(tool));
     }
 
-    pub async fn execute_tool(&self, request: &ToolRequest) -> anyhow::Result<ToolResponse> {
+    pub async fn execute_tool(&self, request: &ToolRequest, ctx: &ToolContext) -> ToolResult<ToolResponse> {
         let tool = self.tools
-            .values()
-            .find(|t| t.tool_type() == request.tool_type)
-            .ok_or_else(|| anyhow::anyhow!("Tool not found for type: {:?}", request.tool_type))?;
+            .get(&request.tool_type.to_string())
+            .ok_or_else(|| crate::types::ToolError::ToolNotFound(request.tool_type.to_string()))?;
 
-        tool.execute(request).await
+        tool.execute(request, ctx).await
     }
 }
 
