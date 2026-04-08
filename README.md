@@ -5,21 +5,21 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
 
-Production-grade AI agent system with a **high-performance Rust execution core** that demonstrates **complete superiority over Python** across all workload types.
+Production-grade AI agent system with a **high-performance Rust execution core** optimized for ultra-low latency workloads.
 
 ## Overview
 
-This project demonstrates how to build **high-performance infrastructure for AI agents** by separating AI reasoning from execution. The architecture achieves **up to 25.3x speedup** in stress scenarios and **5.9x faster** heavy computation while maintaining the flexibility of Python-based AI development.
+This project demonstrates how to build **high-performance infrastructure for AI agents** by separating AI reasoning from execution. The Rust engine provides **parallel execution, retry logic, intelligent caching, and comprehensive monitoring** for production AI systems.
 
 ## Key Features
 
-- **AI agent with tool usage** (ReAct-style reasoning)
-- **Optimized Rust-powered low-latency execution engine**
-- **Async tool execution** with connection pooling and batch processing
-- **Built-in intelligent caching** (LRU cache with 85%+ hit rate)
+- **High-performance Rust execution engine** with parallel processing
+- **Exponential backoff retry logic** for resilient operations  
+- **Intelligent LRU caching** for performance optimization
 - **Real-time metrics collection** (latency, throughput, cache hit rates)
-- **Production-ready error handling** with comprehensive monitoring
-- **Designed for scalable AI systems** with deterministic performance
+- **Production-ready error handling** with domain-specific error types
+- **Type-safe async architecture** optimized for AI workloads
+- **Comprehensive monitoring** with structured logging
 
 ## Architecture
 
@@ -92,47 +92,30 @@ This project demonstrates how to build **high-performance infrastructure for AI 
    cd low_latency_ai_agent_platform
    ```
 
-2. **Run the complete demo** (recommended):
+2. **Quick start** (recommended):
    ```bash
    # Windows
-   run_demo.bat
+   quick_start.bat
    
-   # Linux/macOS
-   chmod +x run_demo.sh
-   ./run_demo.sh
+   # Linux/macOS  
+   chmod +x simple_start.sh
+   ./simple_start.sh
    ```
-   
-   This will:
-   - Build the optimized Rust backend with LTO
-   - Start the server
-   - Run all tests
-   - Execute performance benchmarks
-   - Show results
 
-3. **Or manual setup**:
+3. **Manual setup**:
    ```bash
    # Start the Rust backend
    cd rust-core
    cargo run --release
    
-   # In another terminal, run Python demo
-   cd python-agent
-   python run_demo.py
-   
-   # Run quick tests
+   # Test the system
    python quick_test.py
    ```
 
-4. **Configure the environment**:
+4. **Configure environment**:
    ```bash
-   cp ../.env.example .env
-   # Edit .env with your OpenAI API key
-   ```
-
-5. **Run the demo**:
-   ```bash
-   cd demo
-   python rust_backend_demo.py
+   cp .env.example .env
+   # Edit .env with your API keys
    ```
 
 ## Usage Examples

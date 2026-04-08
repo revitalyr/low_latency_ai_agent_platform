@@ -1,0 +1,17 @@
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "prompt": "Test compute operation",
+  "tools": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440001",
+      "tool_type": "Compute",
+      "parameters": {
+        "operation": "add",
+        "a": 10,
+        "b": 20
+      },
+      "timestamp": "2026-04-08T10:00:00Z"
+    }
+  ],
+  "timestamp": "2026-04-08T10:00:00Z"
+}

@@ -1,14 +1,19 @@
-use crate::types::{ToolRequest, ToolResponse, ToolType};
+use crate::types::{ToolRequest, ToolResponse, ToolContext, ToolResult, ToolType, ToolError};
 use crate::tools::Tool;
 use async_trait::async_trait;
 use std::time::Instant;
 use std::fs;
+use std::io::Read;
+use std::io::Write;
+use anyhow::Result;
+use serde_json::json;
+use chrono::Utc;
 
 pub struct FileTool;
 
 #[async_trait]
 impl Tool for FileTool {
-    async fn execute(&self, request: &ToolRequest) -> anyhow::Result<ToolResponse> {
+    async fn execute(&self, request: &ToolRequest, _ctx: &ToolContext) -> ToolResult<ToolResponse> {
         let start = Instant::now();
         
         let action = request.parameters.get("action")
@@ -40,7 +45,7 @@ impl Tool for FileTool {
                         fs::read_to_string(path)?
                     }
                 } else {
-                    return Err(anyhow::anyhow!("File not found: {}", path));
+                    return Err(ToolError::ExecutionFailed(format!("File not found: {}", path)));
                 };
                 
                 serde_json::json!({

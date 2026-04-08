@@ -31,8 +31,8 @@ class QuickTester:
         try:
             async with self.session.get(f"{self.base_url}/health") as response:
                 if response.status == 200:
-                    data = await response.json()
-                    self.results.append(("Health Check", "PASS", f"Status: {data.get('status', 'OK')}"))
+                    # Health endpoint returns just status code, not JSON
+                    self.results.append(("Health Check", "PASS", f"Status: {response.status}"))
                     return True
                 else:
                     self.results.append(("Health Check", "FAIL", f"Status: {response.status}"))
@@ -60,13 +60,17 @@ class QuickTester:
     async def test_compute_tool(self) -> bool:
         """Test compute tool"""
         try:
+            import uuid
             payload = {
-                "id": "test-compute",
+                "id": str(uuid.uuid4()),
                 "prompt": "Test compute operation",
                 "tools": [{
-                    "tool": "compute",
-                    "input": {"operation": "add", "a": 10, "b": 20}
-                }]
+                    "id": str(uuid.uuid4()),
+                    "tool_type": "Compute",
+                    "parameters": {"operation": "add", "a": 10, "b": 20},
+                    "timestamp": "2026-04-08T10:00:00Z"
+                }],
+                "timestamp": "2026-04-08T10:00:00Z"
             }
             
             start_time = time.time()
@@ -90,13 +94,17 @@ class QuickTester:
     async def test_http_tool(self) -> bool:
         """Test HTTP tool"""
         try:
+            import uuid
             payload = {
-                "id": "test-http",
+                "id": str(uuid.uuid4()),
                 "prompt": "Test HTTP request",
                 "tools": [{
-                    "tool": "http",
-                    "input": {"url": "https://httpbin.org/get", "method": "GET"}
-                }]
+                    "id": str(uuid.uuid4()),
+                    "tool_type": "Http",
+                    "parameters": {"url": "https://httpbin.org/get", "method": "GET"},
+                    "timestamp": "2026-04-08T10:00:00Z"
+                }],
+                "timestamp": "2026-04-08T10:00:00Z"
             }
             
             start_time = time.time()
@@ -120,13 +128,17 @@ class QuickTester:
     async def test_file_tool(self) -> bool:
         """Test file tool"""
         try:
+            import uuid
             payload = {
-                "id": "test-file",
+                "id": str(uuid.uuid4()),
                 "prompt": "Test file operation",
                 "tools": [{
-                    "tool": "file",
-                    "input": {"action": "read", "path": "demo.txt"}
-                }]
+                    "id": str(uuid.uuid4()),
+                    "tool_type": "File",
+                    "parameters": {"action": "read", "path": "test.txt"},
+                    "timestamp": "2026-04-08T10:00:00Z"
+                }],
+                "timestamp": "2026-04-08T10:00:00Z"
             }
             
             start_time = time.time()
@@ -150,13 +162,17 @@ class QuickTester:
     async def test_heavy_compute(self) -> bool:
         """Test heavy compute tool"""
         try:
+            import uuid
             payload = {
-                "id": "test-heavy-compute",
+                "id": str(uuid.uuid4()),
                 "prompt": "Test heavy computation",
                 "tools": [{
-                    "tool": "heavy_compute",
-                    "input": {"iterations": 10000}
-                }]
+                    "id": str(uuid.uuid4()),
+                    "tool_type": "HeavyCompute",
+                    "parameters": {"iterations": 10000},
+                    "timestamp": "2026-04-08T10:00:00Z"
+                }],
+                "timestamp": "2026-04-08T10:00:00Z"
             }
             
             start_time = time.time()

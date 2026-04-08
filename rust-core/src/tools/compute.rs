@@ -1,4 +1,4 @@
-use crate::types::{ToolRequest, ToolResponse, ToolType};
+use crate::types::{ToolRequest, ToolResponse, ToolContext, ToolResult, ToolType};
 use crate::tools::Tool;
 use async_trait::async_trait;
 use std::time::Instant;
@@ -7,7 +7,7 @@ pub struct ComputeTool;
 
 #[async_trait]
 impl Tool for ComputeTool {
-    async fn execute(&self, request: &ToolRequest) -> anyhow::Result<ToolResponse> {
+    async fn execute(&self, request: &ToolRequest, _ctx: &ToolContext) -> ToolResult<ToolResponse> {
         let start = Instant::now();
         
         let operation = request.parameters.get("operation")

@@ -15,12 +15,11 @@ use serde_json::Value;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use tokio::task::LocalSet;
 use tower_http::cors::{Any, CorsLayer};
-use tracing::{info, error};
+use tracing::info;
 use tracing_subscriber;
 
-use crate::types::{AgentTask, AgentResponse, ToolRequest};
+use crate::types::{AgentTask, AgentResponse};
 use crate::engine::ExecutionEngine;
 use crate::tools::{ToolRegistry, HttpTool, FileTool, ComputeTool, HeavyComputeTool, HeavyFileTool};
 use crate::cache::Cache;
@@ -69,7 +68,7 @@ async fn execute_task(
     state.metrics.record_request();
     
     // Create context for this execution
-    let ctx = crate::types::ToolContext::new(task.id.to_string());
+    let _ctx = crate::types::ToolContext::new(task.id.to_string());
     
     // Execute plan with parallel processing, retry, and caching
     match state.engine.execute_plan(task.tools, &state.tool_registry, state.cache).await {

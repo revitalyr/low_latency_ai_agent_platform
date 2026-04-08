@@ -1,6 +1,5 @@
 use crate::types::{ToolRequest, ToolResponse};
 use lru::LruCache;
-use std::collections::HashMap;
 use std::num::NonZeroUsize;
 
 pub struct Cache {
@@ -14,17 +13,11 @@ impl Cache {
         }
     }
 
-    fn generate_key(request: &ToolRequest) -> String {
-        format!("{:?}:{:?}", request.tool_type, request.parameters)
+    pub fn get(&mut self, key: &str) -> Option<ToolResponse> {
+        self.cache.get(key).cloned()
     }
 
-    pub fn get(&mut self, request: &ToolRequest) -> Option<ToolResponse> {
-        let key = Self::generate_key(request);
-        self.cache.get(&key).cloned()
-    }
-
-    pub fn put(&mut self, request: &ToolRequest, response: ToolResponse) {
-        let key = Self::generate_key(request);
+    pub fn put(&mut self, key: String, response: ToolResponse) {
         self.cache.put(key, response);
     }
 

@@ -1,19 +1,23 @@
 use std::collections::HashMap;
+use std::string::FromUtf8Error;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
+use reqwest;
+use serde_json;
+use anyhow;
 
 /// Domain-specific error types for better error handling
 #[derive(Debug, thiserror::Error)]
 pub enum ToolError {
-    #[error("Timeout occurred during execution")]
-    Timeout,
+    #[error("Timeout error: {0}")]
+    Timeout(String),
     
     #[error("Network error: {0}")]
     Network(String),
     
-    #[error("Invalid input parameters")]
-    InvalidInput,
+    #[error("Invalid input: {0}")]
+    InvalidInput(String),
     
     #[error("Execution failed: {0}")]
     ExecutionFailed(String),
@@ -23,6 +27,21 @@ pub enum ToolError {
     
     #[error("Cache error: {0}")]
     CacheError(String),
+    
+    #[error("IO error: {0}")]
+    IoError(#[from] std::io::Error),
+    
+    #[error("HTTP error: {0}")]
+    HttpError(#[from] reqwest::Error),
+    
+    #[error("JSON error: {0}")]
+    JsonError(#[from] serde_json::Error),
+    
+    #[error("Anyhow error: {0}")]
+    AnyhowError(#[from] anyhow::Error),
+    
+    #[error("UTF-8 error: {0}")]
+    Utf8Error(#[from] FromUtf8Error),
 }
 
 /// Type alias for Result with domain error

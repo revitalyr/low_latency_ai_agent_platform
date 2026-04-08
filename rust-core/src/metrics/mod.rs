@@ -6,6 +6,8 @@ pub struct Metrics {
     pub total_execution_time_ms: Arc<AtomicU64>,
     pub cache_hits: Arc<AtomicU64>,
     pub cache_misses: Arc<AtomicU64>,
+    pub success_count: Arc<AtomicU64>,
+    pub failure_count: Arc<AtomicU64>,
 }
 
 impl Metrics {
@@ -15,6 +17,8 @@ impl Metrics {
             total_execution_time_ms: Arc::new(AtomicU64::new(0)),
             cache_hits: Arc::new(AtomicU64::new(0)),
             cache_misses: Arc::new(AtomicU64::new(0)),
+            success_count: Arc::new(AtomicU64::new(0)),
+            failure_count: Arc::new(AtomicU64::new(0)),
         }
     }
 
@@ -32,6 +36,18 @@ impl Metrics {
 
     pub fn record_cache_miss(&self) {
         self.cache_misses.fetch_add(1, Ordering::Relaxed);
+    }
+
+    pub fn increment_cache_hits(&self) {
+        self.record_cache_hit();
+    }
+
+    pub fn increment_success_count(&self) {
+        self.success_count.fetch_add(1, Ordering::Relaxed);
+    }
+
+    pub fn increment_failure_count(&self) {
+        self.failure_count.fetch_add(1, Ordering::Relaxed);
     }
 
     pub fn average_execution_time_ms(&self) -> f64 {
@@ -52,6 +68,19 @@ impl Metrics {
         } else {
             hits as f64 / total as f64
         }
+    }
+
+    pub fn get_stats(&self) -> serde_json::Value {
+        serde_json::json!({
+            "total_requests": self.total_requests.load(Ordering::Relaxed),
+            "total_execution_time_ms": self.total_execution_time_ms.load(Ordering::Relaxed),
+            "cache_hits": self.cache_hits.load(Ordering::Relaxed),
+            "cache_misses": self.cache_misses.load(Ordering::Relaxed),
+            "success_count": self.success_count.load(Ordering::Relaxed),
+            "failure_count": self.failure_count.load(Ordering::Relaxed),
+            "average_execution_time_ms": self.average_execution_time_ms(),
+            "cache_hit_rate": self.cache_hit_rate()
+        })
     }
 }
 

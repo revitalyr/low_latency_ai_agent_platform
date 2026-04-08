@@ -1,8 +1,11 @@
-use crate::types::{ToolRequest, ToolResponse, ToolType, ToolContext, ToolResult};
+use crate::types::{ToolRequest, ToolResponse, ToolType, ToolContext, ToolError, ToolResult};
 use crate::tools::Tool;
 use async_trait::async_trait;
+use reqwest::Client;
 use std::time::Instant;
 use std::time::Duration;
+use serde_json::Value;
+use anyhow::Result;
 
 pub struct HttpTool;
 
