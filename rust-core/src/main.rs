@@ -21,7 +21,7 @@ use tracing_subscriber;
 
 use crate::types::{AgentTask, AgentResponse, ToolRequest};
 use crate::engine::ExecutionEngine;
-use crate::tools::{ToolRegistry, HttpTool, FileTool, ComputeTool};
+use crate::tools::{ToolRegistry, HttpTool, FileTool, ComputeTool, HeavyComputeTool, HeavyFileTool};
 use crate::cache::Cache;
 use crate::metrics::Metrics;
 
@@ -36,9 +36,13 @@ pub struct AppState {
 impl AppState {
     pub fn new() -> Self {
         let mut tool_registry = ToolRegistry::new();
+        
+        // Register optimized tools (now the default tools)
         tool_registry.register(HttpTool);
         tool_registry.register(FileTool);
         tool_registry.register(ComputeTool);
+        tool_registry.register(HeavyComputeTool);
+        tool_registry.register(HeavyFileTool);
         
         Self {
             tool_registry: Arc::new(tool_registry),

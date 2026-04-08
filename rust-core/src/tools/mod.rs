@@ -5,10 +5,14 @@ use std::collections::HashMap;
 pub mod http;
 pub mod file;
 pub mod compute;
+pub mod heavy_compute;
+pub mod heavy_file;
 
 pub use http::HttpTool;
 pub use file::FileTool;
 pub use compute::ComputeTool;
+pub use heavy_compute::HeavyComputeTool;
+pub use heavy_file::HeavyFileTool;
 
 #[async_trait]
 pub trait Tool: Send + Sync {
