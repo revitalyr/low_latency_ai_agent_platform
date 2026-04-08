@@ -1,1 +1,0 @@
-Hello, Rust AI Agent Platform! This is a test file for file operations.

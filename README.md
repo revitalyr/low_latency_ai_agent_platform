@@ -112,7 +112,24 @@ This project demonstrates how to build **high-performance infrastructure for AI 
    python quick_test.py
    ```
 
-4. **Configure environment**:
+4. **Run comprehensive demo** (recommended):
+   ```bash
+   # Windows
+   run_demo.bat
+   
+   # Linux/macOS
+   chmod +x run_demo.sh
+   ./run_demo.sh
+   ```
+   
+   This will:
+   - Build the optimized Rust backend
+   - Start the server
+   - Run interactive demo with multiple workloads
+   - Execute comprehensive performance benchmark
+   - Generate detailed performance report
+
+5. **Configure environment**:
    ```bash
    cp .env.example .env
    # Edit .env with your API keys
